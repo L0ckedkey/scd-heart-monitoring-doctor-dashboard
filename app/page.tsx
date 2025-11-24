@@ -185,9 +185,9 @@ export default function DoctorDashboard() {
   }
 
   const redirectPage = (patientID) => {
-    console.log('here')
+    console.log(`${process.env.NEXT_PUBLIC_METABASE_URL}${patientID}`)
     window.open(
-    `https://scd-dashboard.hansprojects.com/dashboard/2-scd?patient_id=${patientID}`,
+      `${process.env.NEXT_PUBLIC_METABASE_URL}${patientID}`,
     "_blank"
   );
   }
