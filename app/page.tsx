@@ -20,6 +20,10 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 import { Heart, Pill, Calendar, User, Plus, Edit, Trash2, Info, RefreshCw, Activity } from "lucide-react"
+import { getAdditionalInfoColor } from "@/components/colors";
+import { PatientCard } from "@/components/patientCard";
+import { MedicationCard } from "@/components/medicationCard";
+import { ConsultationCard } from "@/components/consultationCard";
 
 
 export default function DoctorDashboard() {
@@ -38,7 +42,7 @@ export default function DoctorDashboard() {
   const [patients, setPatients] = useState([]);
   const [consultations, setConsultations] = useState([]);
   const [medicines, setMedicines] = useState([])
-  const [openDialogId, setOpenDialogId] = useState(null); 
+  const [openDialogId, setOpenDialogId] = useState(null);
 
   useEffect(() => {
     getPatients().then(setPatients).catch(console.error);
@@ -46,45 +50,10 @@ export default function DoctorDashboard() {
     getMedicines().then(setMedicines).catch(console.error)
   }, []);
 
-  const getClassificationColor = (classification) => {
-    switch (classification) {
-      case 0:
-        return "bg-green-100 text-green-800"
-      case 1:
-        return "bg-red-100 text-red-800"
-      default:
-        return "bg-gray-100 text-gray-800"
-    }
-  }
-
-  const getAdditionalInfoColor = (info) => {
-    switch (info) {
-      case 1:
-        return "bg-green-100 text-green-800"
-      case 2:
-        return "bg-red-100 text-red-800"
-      default:
-        return "bg-gray-100 text-gray-800"
-    }
-  }
-
-  const getCholesterolColor = (status) => {
-    switch (status) {
-      case "Normal":
-        return "bg-green-100 text-green-800"
-      case "Low":
-        return "bg-yellow-100 text-yellow-800"
-      case "High":
-        return "bg-red-100 text-red-800"
-      default:
-        return "bg-gray-100 text-gray-800"
-    }
-  }
-
-  const addMedication = async (medName, dosage, category) => {
+  const addMedication = async (medName: String, dosage: String, category: String) => {
     try {
       const response = await addMedicine(medName, dosage, category);
-      
+
       if (response.status) {
         getMedicines().then(setMedicines).catch(console.error)
         setNewMedication({ name: "", dosage: "", category: "" })
@@ -97,10 +66,10 @@ export default function DoctorDashboard() {
     }
   };
 
-  const updateMedication = async (medID, medName, dosage, category) => {
+  const updateMedication = async (medID: String, medName: String, dosage: String, category: String) => {
     try {
       const response = await updateMedicine(medID, medName, dosage, category);
-    
+
       if (response.status) {
         getMedicines().then(setMedicines).catch(console.error)
         setEditingMedication({ dosage: "", category: "", medID: "" })
@@ -113,8 +82,8 @@ export default function DoctorDashboard() {
     }
   }
 
-  const deleteMedication = async (medID) => {
-   try {
+  const deleteMedication = async (medID: String) => {
+    try {
       const response = await deleteMedicine(medID);
       console.log("here")
       if (response.status) {
@@ -127,16 +96,16 @@ export default function DoctorDashboard() {
     }
   }
 
-  const assignMedicationToPatient = async (consultationId, patientId, medicationName, frequency, notes, status) => {
+  const assignMedicationToPatient = async (consultationId: String, patientId: String, medicationName: String, frequency: String, notes: String, status: String) => {
     try {
       const response = await addDetailMedicine(patientId, medicationName, frequency, notes);
-    
+
       if (response.status) {
-          const response = await setMedAssignConsultation(consultationId, status);
-          if (response.status) {
-            getPendingConsultations().then(setConsultations).catch(console.error)
-            getPatients().then(setPatients).catch(console.error)
-          }
+        const response = await setMedAssignConsultation(consultationId, status);
+        if (response.status) {
+          getPendingConsultations().then(setConsultations).catch(console.error)
+          getPatients().then(setPatients).catch(console.error)
+        }
       }
     } catch (err) {
       console.error(err);
@@ -147,10 +116,10 @@ export default function DoctorDashboard() {
     setAssignmentNotes("")
   }
 
-  const removeMedicationFromPatient = async (detailID) => {
+  const removeMedicationFromPatient = async (detailID: String) => {
     try {
       const response = await deleteDetailMedicine(detailID);
-    
+
       if (response.status) {
         getPatients().then(setPatients).catch(console.error);
       }
@@ -159,7 +128,7 @@ export default function DoctorDashboard() {
     }
   }
 
-  const scheduleConsultation = async (consultationId) => {
+  const scheduleConsultation = async (consultationId: String) => {
     try {
       const response = await setScheduleConsultation(consultationId);
       if (response.status) {
@@ -173,29 +142,27 @@ export default function DoctorDashboard() {
     }
   };
 
-  const refreshData = (page) => {
-    if(page == 'patient'){
+  const refreshData = (page: String) => {
+    if (page == 'patient') {
       getPatients().then(setPatients).catch(console.error);
-    }else if(page == 'med'){
+    } else if (page == 'med') {
       getMedicines().then(setMedicines).catch(console.error);
-    }else if(page == 'consul'){
+    } else if (page == 'consul') {
       getPendingConsultations().then(setConsultations).catch(console.error);
     }
-    
+
   }
 
-  const redirectPage = (patientID) => {
+  const redirectPage = (patientID: String) => {
     console.log(`${process.env.NEXT_PUBLIC_METABASE_URL}${patientID}`)
     window.open(
       `${process.env.NEXT_PUBLIC_METABASE_URL}${patientID}`,
-    "_blank"
-  );
+      "_blank"
+    );
   }
-
 
   return (
     <div className="min-h-screen bg-slate-50">
-      {/* Header */}
       <header className="bg-white border-b border-slate-200 px-6 py-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -211,9 +178,6 @@ export default function DoctorDashboard() {
             <Badge variant="outline" className="text-yellow-700 border-yellow-200">
               {consultations.length} Pending Consultations
             </Badge>
-            {/* <Badge variant="outline" className="text-blue-700 border-blue-200">
-              asdMedications
-            </Badge> */}
           </div>
         </div>
       </header>
@@ -246,95 +210,12 @@ export default function DoctorDashboard() {
             </div>
             <div className="grid gap-4">
               {patients.map((patient) => (
-                <Card key={patient.patientID} className="hover:shadow-md transition-shadow">
-                  <CardHeader className="pb-3">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <CardTitle className="text-lg">{patient.email}</CardTitle>
-                        <CardDescription>
-                          <Badge className={getAdditionalInfoColor(patient.isHavingHypertension)}>{patient.isHavingHypertension == "" ? "No data" : patient.isHavingHypertension == "1" ? "Hypertension: Yes": "Hypertension: No"}</Badge> • <Badge className={getAdditionalInfoColor(patient.isSmoker)}>{patient.isSmoker == "" ? "No data" : patient.isSmoker == "1" ? "Smoker: Yes": "Smoker: No"}</Badge> • <Badge className={getCholesterolColor(patient.cholesterolLevel)}>{patient.cholesterolLevel == "" ? "No data" : "Cholesterol: " + patient.cholesterolLevel}</Badge>  • Last visit: {patient.last_visit == null ? "-" : patient.last_visit} 
-                        </CardDescription>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Badge className={getClassificationColor(patient.classification)}>{patient.classification === null || patient.classification === undefined ? "No Data" : patient.classification == 0 ? "Healthy" : "Not Healthy"}</Badge>
-                        {/* <Badge className={getStatusColor(patient.status)}>{patient.status.replace("_", " ")}</Badge> */}
-                        <Button variant="outline" size="sm" onClick={() => redirectPage(patient.patientID)}>
-                          <Activity className="h-4 w-4 mr-2" />
-                          Check Patient Data
-                        </Button>
-                      </div>
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      <div>
-                        <Label className="text-sm font-medium text-slate-700">Current Medications</Label>
-                        <div className="flex flex-wrap gap-2 mt-1">
-                          {patient.medications.map((med, index) => (
-                            <div key={med.detailID} className="flex items-center gap-1">
-                              <Badge variant="secondary">
-                                {med.name} - {med.dosage}
-                              </Badge>
-                              <Dialog>
-                                <DialogTrigger asChild>
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    className="h-6 w-6 p-0 text-blue-500 hover:text-blue-700"
-                                  >
-                                    <Info className="h-3 w-3" />
-                                  </Button>
-                                </DialogTrigger>
-                                <DialogContent>
-                                  <DialogHeader>
-                                    <DialogTitle>Medication Details</DialogTitle>
-                                    <DialogDescription>
-                                      Information about {med.name} for {patient.email}
-                                    </DialogDescription>
-                                  </DialogHeader>
-                                  <div className="space-y-4">
-                                    <div className="grid grid-cols-2 gap-4">
-                                      <div>
-                                        <Label className="text-sm font-medium">Medication Name</Label>
-                                        <p className="text-sm text-slate-600">{med.name}</p>
-                                      </div>
-                                      <div>
-                                        <Label className="text-sm font-medium">Dosage</Label>
-                                        <p className="text-sm text-slate-600">{med.dosage}</p>
-                                      </div>
-                                      <div>
-                                        <Label className="text-sm font-medium">Frequency</Label>
-                                        <p className="text-sm text-slate-600">{med.frequency}</p>
-                                      </div>
-                                      <div>
-                                        <Label className="text-sm font-medium">Patient</Label>
-                                        <p className="text-sm text-slate-600">{patient.email}</p>
-                                      </div>
-                                    </div>
-                                    <div>
-                                      <Label className="text-sm font-medium">Notes & Instructions</Label>
-                                      <p className="text-sm text-slate-600 mt-1 p-3 bg-slate-50 rounded-md">
-                                        {med.notes || "No additional notes"}
-                                      </p>
-                                    </div>
-                                  </div>
-                                </DialogContent>
-                              </Dialog>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                className="h-6 w-6 p-0 text-red-500 hover:text-red-700"
-                                onClick={() => removeMedicationFromPatient(med.detailID)}
-                              >
-                                <Trash2 className="h-3 w-3" />
-                              </Button>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
+                <PatientCard
+                  key={patient.patientID}
+                  patient={patient}
+                  redirectPage={(id: String) => redirectPage(id)}
+                  removeMedicationFromPatient={(id: String) => console.log("remove", id)}
+                />
               ))}
             </div>
           </TabsContent>
@@ -407,7 +288,7 @@ export default function DoctorDashboard() {
                             </SelectContent>
                           </Select>
                         </div>
-                        <Button onClick={() => addMedication(newMedication.name, newMedication.dosage, newMedication.category) } className="w-full">
+                        <Button onClick={() => addMedication(newMedication.name, newMedication.dosage, newMedication.category)} className="w-full">
                           Add Medication
                         </Button>
                       </div>
@@ -417,97 +298,18 @@ export default function DoctorDashboard() {
               </CardHeader>
               <CardContent>
                 <div className="grid gap-4">
-                {medicines.map((medication) => (
-                  <Card key={medication.medID} className="border-l-4 border-l-blue-500">
-                    <CardContent className="pt-2">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <h3 className="font-semibold text-lg">{medication.medName}</h3>
-                          <p className="text-sm text-slate-600">
-                            {medication.dosage} • {medication.category}
-                          </p>
-                        </div>
-                        <div className="flex items-center gap-3">
-                          <Dialog
-                            open={openDialogId === medication.medID}
-                            onOpenChange={(open) => {
-                              if (open) {
-                                setEditingMedication({ ...medication });
-                                setOpenDialogId(medication.medID);
-                              } else {
-                                setOpenDialogId(null);
-                              }
-                            }}
-                          >
-                            <DialogTrigger asChild>
-                              <Button variant="ghost" size="sm">
-                                <Edit className="h-4 w-4" />
-                              </Button>
-                            </DialogTrigger>
-                            <DialogContent>
-                              <DialogHeader>
-                                <DialogTitle>Edit Medication</DialogTitle>
-                                <DialogDescription>Update medication details</DialogDescription>
-                              </DialogHeader>
-                              {editingMedication && openDialogId === medication.medID && (
-                                <div className="space-y-4">
-                                  <div>
-                                    <Label>Medication Name</Label>
-                                    <Input
-                                      value={editingMedication.medName}
-                                      onChange={(e) =>
-                                        setEditingMedication({ ...editingMedication, medName: e.target.value })
-                                      }
-                                    />
-                                  </div>
-                                  <div>
-                                    <Label>Dosage</Label>
-                                    <Input
-                                      value={editingMedication.dosage}
-                                      onChange={(e) =>
-                                        setEditingMedication({ ...editingMedication, dosage: e.target.value })
-                                      }
-                                    />
-                                  </div>
-                                  <div>
-                                    <Label>Category</Label>
-                                    <Input
-                                      value={editingMedication.category}
-                                      onChange={(e) =>
-                                        setEditingMedication({ ...editingMedication, category: e.target.value })
-                                      }
-                                    />
-                                  </div>
-                                  <Button
-                                    onClick={() =>
-                                      updateMedication(
-                                        editingMedication.medID,
-                                        editingMedication.medName,
-                                        editingMedication.dosage,
-                                        editingMedication.category
-                                      )
-                                    }
-                                    className="w-full"
-                                  >
-                                    Update Medication
-                                  </Button>
-                                </div>
-                              )}
-                            </DialogContent>
-                          </Dialog>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="text-red-500 hover:text-red-700"
-                            onClick={() => deleteMedication(medication.medID)}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
+                  {medicines.map((medication) => (
+                    <MedicationCard
+                      key={medication.medID}
+                      medication={medication}
+                      openDialogId={openDialogId}
+                      setOpenDialogId={setOpenDialogId}
+                      editingMedication={editingMedication}
+                      setEditingMedication={setEditingMedication}
+                      updateMedication={updateMedication}
+                      deleteMedication={deleteMedication}
+                    />
+                  ))}
                 </div>
               </CardContent>
             </Card>
@@ -530,114 +332,23 @@ export default function DoctorDashboard() {
               <CardContent>
                 <div className="space-y-4">
                   {consultations.map((consultation) => (
-                    <Card key={consultation.patientID} className="border-l-4 border-l-blue-500">
-                      <CardContent className="pt-4">
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <h3 className="font-semibold">{consultation.email}</h3>
-                            <p className="text-sm text-slate-600">
-                              <Badge className={getAdditionalInfoColor(consultation.isHavingHypertension)}>{consultation.isHavingHypertension == "" ? "No data" : consultation.isHavingHypertension == "1" ? "Hypertension: Yes": "Hypertension: No"}</Badge> • <Badge className={getAdditionalInfoColor(consultation.isSmoker)}>{consultation.isSmoker == "" ? "No data" : consultation.isSmoker == "1" ? "Smoker: Yes": "Smoker: No"}</Badge> • <Badge className={getCholesterolColor(consultation.cholesterolLevel)}>{consultation.cholesterolLevel == "" ? "No data" : "Cholesterol: " + consultation.cholesterolLevel}</Badge> 
-                            </p>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <Dialog>
-                              <DialogTrigger asChild>
-                                <Button variant="outline" size="sm" onClick={() => setSelectedPatient(consultation)}>
-                                  <Pill className="h-4 w-4 mr-1" />
-                                  Assign Medication
-                                </Button>
-                              </DialogTrigger>
-                              <DialogContent>
-                                <DialogHeader>
-                                  <DialogTitle>Assign Medication to {consultation.email}</DialogTitle>
-                                  <DialogDescription>
-                                    Select a medication, specify dosage and add consultation notes
-                                  </DialogDescription>
-                                </DialogHeader>
-                                <div className="space-y-4">
-                                  <div>
-                                    <Label>Select Medication</Label>
-                                    <Select
-                                      value={selectedMedicationForAssignment}
-                                      onValueChange={setSelectedMedicationForAssignment}
-                                    >
-                                      <SelectTrigger>
-                                        <SelectValue placeholder="Select medication" />
-                                      </SelectTrigger>
-                                      <SelectContent>
-                                        {medicines.map((med) => (
-                                          <SelectItem key={med.medID} value={med.medID}>
-                                            {med.medName} - {med.dosage}
-                                          </SelectItem>
-                                        ))}
-                                      </SelectContent>
-                                    </Select>
-                                  </div>
-                                  <div>
-                                    <Label>Frequency</Label>
-                                    <Input
-                                      placeholder="e.g., 10mg, 25mg"
-                                      value={assignmentDosage}
-                                      onChange={(e) => setAssignmentDosage(e.target.value)}
-                                    />
-                                  </div>
-                                  <div>
-                                    <Label>Consultation Notes & Instructions</Label>
-                                    <Textarea
-                                      placeholder="Add consultation notes and medication instructions..."
-                                      value={assignmentNotes}
-                                      onChange={(e) => setAssignmentNotes(e.target.value)}
-                                      rows={3}
-                                    />
-                                  </div>
-                                  
-                                  <Button
-                                    className="w-full"
-                                    onClick={() =>
-                                      assignMedicationToPatient(
-                                        consultation.consultation_id, 
-                                        consultation.patientID,
-                                        selectedMedicationForAssignment,
-                                        assignmentDosage,
-                                        assignmentNotes,
-                                        "med_assign"
-                                      )
-                                    }
-                                    disabled={!selectedMedicationForAssignment || !assignmentDosage}
-                                  >
-                                    Assign Medication
-                                  </Button>
-                                </div>
-                              </DialogContent>
-                            </Dialog>
-
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => scheduleConsultation(consultation.consultation_id)}
-                            >
-                              <Calendar className="h-4 w-4 mr-1" />
-                              Schedule Consultation
-                            </Button>
-                            <Button variant="outline" size="sm" onClick={() => redirectPage(consultation.patientID)}>
-                              <Activity className="h-4 w-4 mr-2" />
-                              Check Patient Data
-                            </Button>
-                          </div>
-                        </div>
-
-                        <div className="mt-4">
-                          <Label className="text-sm font-medium text-slate-700">Current Medications</Label>
-                          <div className="flex flex-wrap gap-2 mt-1">
-                            {consultation.medications.map((med, index) => (
-                              <Badge key={index} variant="secondary">
-                                {med.name} - {med.dosage}
-                              </Badge>
-                            ))}
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
+                    <ConsultationCard
+                      key={consultation.consultation_id}
+                      consultation={consultation}
+                      medicines={medicines}
+                      setSelectedPatient={setSelectedPatient}
+                      assignMedicationToPatient={assignMedicationToPatient}
+                      scheduleConsultation={scheduleConsultation}
+                      redirectPage={redirectPage}
+                      selectedMedicationForAssignment={selectedMedicationForAssignment}
+                      setSelectedMedicationForAssignment={
+                        setSelectedMedicationForAssignment
+                      }
+                      assignmentDosage={assignmentDosage}
+                      setAssignmentDosage={setAssignmentDosage}
+                      assignmentNotes={assignmentNotes}
+                      setAssignmentNotes={setAssignmentNotes}
+                    />
                   ))}
                 </div>
               </CardContent>
